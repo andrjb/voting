@@ -1,1 +1,43 @@
-# voting
+# voting.anetabtc.io
+* AIP: 2
+* Title: voting.anetabtc.io
+* Authors: andrjb
+* Status: Draft
+* Type: Process
+* Created: 2022-02-17
+## Abstract
+The idea of AIP-0002 is to specify and explore concrete ideas for a voting platform. Different approaches will be considered and their advantages and disadvantages weighed. The topic of decentralization will be addressed and specific examples of how such a protocol might operate will be discussed. 
+## Motivation
+After the introduction of AGPs and AIPs, the next important step is to provide the community with a platform to vote on them. Since anetaBTC functions as a DAO, every owner of cNETA or NETA tokens is entitled to have a say in the future of the protocol. Therefore, it is crucial to provide a fair and robust platform to make these votes and shape the future of the protocol. Verifiability and transparency are strengths of blockchain technology, which is a good underlying principle for building this voting platform. 
+## Specification
+### Basics
+The basic principle of a vote is simple. Every owner of cNETA or NETA is entitled to vote. However, the amount of tokens a person holds plays a role. The more a person owns, the heavier weighs their decision. Here we will discuss how a voting round could be carried out. In order for a voting session to occur, there needs to be AGPs or AIPs ready to vote on. If this is the case, a voting round is initiated according to the following procedure. 
+* registration period of 7 days announced
+* token holders will be able to register their wallet
+* after 7 days the registration gets closed and a snapshot of all registered wallets will be taken
+* After 7 days for preparation and to clean up the data a voting page will go public. Voters can select how they decide about each AGP/AIP and the site will provide them with a "hash" of their decision. Voters must then make a transaction to themselve with that hash. The voting period will again last for 7 days. 
+
+This is the basic procedure of a voting session. Concrete implementations on the technical side can vary. The effort required for development and the degree of decentralization play an important role. Therefore, different procedures will be examined and their advantages and disadvantages will be weighed up.
+### Less decentralized, easiest to implement
+This proposal is by far the simplest, though not the most elegant. The idea is to provide a website for registration for a time window of 7 days at a time, which allows token holders to register with their address or stake key (Cardano). This type of registration is simple, as only a form must be filled out and the data is then stored in a database. Optionally, a characteristic intra-wallet transaction could also be made for the registration and in the simplest case, the transaction id could also be filled in the form. After the registration form is closed, a website goes live where the voter can tick their choices, this then generates a "hash" for a transaction that the voter must send to themselves. This ensures that the owner of the wallet has voted and no one else has voted for them. In the simplest case, the voter is then also asked directly for the transaction id, which they can also enter on the website. When the voting round is over, the results are determined based on the transactions. The number of cNETA/NETA of a voter at the time of the snapshot is taken into account. After the data has been cleaned and the results summed, the results can be displayed on a website. The scripts for determination as well as the raw data will be made public for additional transparency.  
+
+![image](https://user-images.githubusercontent.com/99014268/154659032-fb48dc26-34d9-452c-9ce1-7419d4e9cc74.png)
+#### Pro and contra
+While this solution is easy to implement, it may lack some decentralization. This is mainly the case because a database is used for registration. However, if instead of a simple form for registration, an intra-wallet registration transaction is required that involves a characteristic amount of erg/ada, the registration would be verifiable on the blockchain. The user can then fill in their transaction id from their registration transaction into a form. However, since a database is still used, this hardly increases the degree of decentralization. With a voting registration form scripts that evaluate the voting results only need to look at the given transaction ids and determine their content. For example, through api.ergoplatform or Blockfrost API. This approach may not be the most user-friendly, since the transaction ID must be provided by the voter, but is simple in implementation and should provide a verifiable platform. Manipulation on the part of the platform could also already be sufficiently excluded by publishing the data and by registering on the blockchain. A disadvantage of this approach, however, is that voters who make a registration transaction but fail to submit the transaction ID are excluded from voting. Once the snapshot is taken, the list of eligible voters is fixed.
+#### some illustrations
+![image](https://user-images.githubusercontent.com/99014268/154695463-c0d9a87a-338a-48ae-bf73-23e04cd91014.png)
+### More decentralized, more complicated to implement
+This approach is very similar to the first one. The main difference is that no transaction id needs to be specified for registration and all data is obtained directly from the blockchain. For registration, a characteristic transaction is again made by an eligible voter. However, instead of passing the transaction id to the database, the blockchain is  scanned for registrations respectively characteristic transactions. All data is automatically collected during the registration phase. Once the registration period is over, a snapshot is taken and the voting session can begin. This is also very similar to the first approach. Voters must again make a characteristic transaction depending on their voting decisions. Again, data is collected by scanning the blockchain for such transactions. Of course, only transactions that are made by registered wallets are counted. In case of several transactions of one voter, the last transaction is taken as the result.
+#### Pro and Contra
+Obviously, this approach is very similar to the first approach. The main difference is that all data is collected by scanning the blockchain instead of using a form. Thus, it cannot happen that people who have theoretically registered through a transaction, but have not passed on the transaction id, are excluded. All in all, this approach makes for a more robust platform. Collecting the data may be a bit more difficult, but due to the given transparency of the blockchain, this approach may seem fairer. 
+### Additional
+#### Building a very basic voting "hash"
+Imagine that a voting session is ongoing with 3 proposals. The user can determine how to vote on each proposal and the website generates a transaction based on the decisions reflecting them. The following picture illustrates how a simple voting form could look like. 
+
+![image](https://user-images.githubusercontent.com/99014268/154690772-c54fc2ea-f5d2-4d72-8b4d-30598babff7b.png)
+#### Potential dapp
+Both approaches could be made more user-friendly by building a simple dapp. Instead of having to do the transactions manually, the dapp can automatically build the transactions so that the user only has to sign the transaction. This means that the user only has to fill in his voting decisions, press a button and sign a automatically generated transaction which includes their decision.  
+## Conclusions
+A simple voting platform is easy to build, as long as central databases are used. However, this is not desirable for a high degree of decentralization, which already makes the technical implementation a lot more complicated. For a first iteration of the voting platform, the option of registration by transaction together with a database could possibly be considered. This is verifiable unless a user does not submit their transaction id. In the longer term, however, the option of obtaining all data directly from the blockchain via scanning would be preferable. Furthermore, there is a lot of potential for further improvement of such a platform up to a fully functional dapp for the best user experience. 
+
+The first option does not work trustlessly, the second one to some extent, as it is possible for anyone to verify the voting results for themselves, as all the data is on a public blockchain. The only thing that can lead to not fully traceable actions in the first version is if someone makes a registration transaction but does not submit the transaction id for it and is thus excluded from the voting session. This solution is therefore at least almost satisfactory. 
