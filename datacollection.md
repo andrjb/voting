@@ -1,1 +1,2 @@
-
+# Data collection
+To collect data directly from the blockchain, rather than on a central database, existing explorers can be used. First, the infrastructure for Ergo should be built. For this purpose, it is advisable to use a separate instance of the Ergo Explorer. A node is used for this purpose together with the open-source Ergo explorer. The access to transaction data can then be done like to a database with SQL queries. Anyone interested in checking voting results can do so by doing the same thing, also running their own instance of Ergo Explorer and check for characteristic transactions. 
