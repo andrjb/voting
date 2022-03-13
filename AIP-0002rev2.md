@@ -58,14 +58,14 @@ This query must be executed at the time of the snapshot (or the chain-grabber mu
 #### Collecting votes
 Votes can be collected through the following query. 
 ```
-select address,
+select no.address,
 qi.origaddress,
 value,
 no.tx_id,
 settlement_height,
-row_number() over (partition by address order by settlement_height desc) as rnk,
-index,
-i.origbox
+row_number() over (partition by no.address order by settlement_height desc) as rnk,
+i.origbox,
+kk.acctot
 from public.node_outputs as no
 
 left join 
@@ -80,6 +80,12 @@ left join
 where uq.main_chain = true ) qi
 on qi.box_id = i.origbox
 
+left join 
+(select ki.address, ki.account_total as acctot
+  from test ki
+where ki.address like '9%%') kk
+on kk.address = no.address
+
 where
 (no.settlement_height between 694549 and 705885) 
 and (no.value = 30042146 or no.value = 30053153)
@@ -88,12 +94,15 @@ and no.address = qi.origaddress
 order by no.tx_id, index
 ;
 ```
-This query can be executed after closing the voting session to get the voting results. The range of the block height can be specified to fit the voting period. Furthermore, the value for all possibilities of characteristic transactions can be adjusted. This query already checks whether someone has tried to cast a vote for a wallet that does not belong to them and automatically ignores these transactions. There is also a column that shows which is the latest characteristic transaction. This allowes that if someone changes their mind during the voting session, a transaction can be made again and only the latest transaction will be taken into account. Now further analysis must be performed on this data to get the final voting results. 
+This query can be executed after closing the voting session to get the voting results. The range of the block height can be specified to fit the voting period. Furthermore, the value for all possibilities of characteristic transactions can be adjusted. This query already checks whether someone has tried to cast a vote for a wallet that does not belong to them and automatically ignores these transactions. There is also a column that shows which is the latest characteristic transaction. This allowes that if someone changes their mind during the voting session, a transaction can be made again and only the latest transaction will be taken into account. Currently older votes get saved too for additional traceability. The "test" table mentioned in the code is a snapshot of all wallets that have NETA. The snapshot must be imported as a table, which can then be used to directly output the corresponding amount of NETA to the voting results. The output of this query is a table that already contains all the information to determine the voting results. Now all that remains is for a script to count the votes. 
 
-![image](https://user-images.githubusercontent.com/99014268/158066530-fb08f881-ab58-4915-892e-ae6ad9a43874.png)
+![image](https://user-images.githubusercontent.com/99014268/158069398-cf92b0d1-71bd-4272-90be-48db5d750840.png)
+### Additional
+#### Building a basic voting "hash"
+Imagine that a voting session is ongoing with 3 proposals. The user can determine how to vote on each proposal and the website generates a transaction based on the decisions reflecting them. The following picture illustrates how a simple voting form could look like. 
 
+![image](https://user-images.githubusercontent.com/99014268/158069879-6e90d485-8ed9-4351-9fa2-ef10fbbfba27.png)
 
-#### Further analysis of raw data
-The goal is to enable the following things through further analysis:
-
-First all entries that are not the latest transactions should get removed. Since the raw voting data is stored in a csv, as well as the data from the snapshot, it must be determined how much the vote of each wallet that participated weights. This can be done by a script that combines the data and determines the weight for all valid voting transactions. 
+In order to avoid interferences with voting sessions of other DAOs, which may use the same system, the value 012340 is added in front of the actual information (here 113) so that it is clear that this transaction belongs to an anetaBTC voting session.
+#### Potential dapp
+This approach could be made more user-friendly by building a simple dapp. Instead of having to do the transactions manually, the dapp can automatically build the transactions so that the user only has to sign the transaction. This means that the user only has to fill in his voting decisions, press a button and sign a automatically generated transaction which includes their decision. 
