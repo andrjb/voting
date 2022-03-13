@@ -52,6 +52,48 @@ The output of the query will look similar to the following picture.
 
 ![image](https://user-images.githubusercontent.com/99014268/158035972-923610ee-b903-417c-a738-30c5e0b167c5.png)
 #### Note
-This query must be executed at the time of the snapshot, since the amount of NETA in possession may change afterwards. 
+This query must be executed at the time of the snapshot (or the chain-grabber must be stopped at the right time), since the amount of NETA in possession may change afterwards. 
 
 **Credits to**: *https://github.com/Eeysirhc also known as curbsideprophet for providing a [query](https://github.com/Eeysirhc/ergo-intelligence/blob/main/sql/anetabtc-address_balance.sql) which needed only slight modifications :blue_heart:*
+#### Collecting votes
+Votes can be collected through the following query. 
+```
+select address,
+qi.origaddress,
+value,
+no.tx_id,
+settlement_height,
+row_number() over (partition by address order by settlement_height desc) as rnk,
+index,
+i.origbox
+from public.node_outputs as no
+
+left join 
+(select ni.tx_id, ni.box_id as origbox
+  from node_inputs ni
+where ni.main_chain = true ) i
+on i.tx_id = no.tx_id
+
+left join 
+(select uq.box_id, uq.address as origaddress
+  from node_outputs uq
+where uq.main_chain = true ) qi
+on qi.box_id = i.origbox
+
+where
+(no.settlement_height between 694549 and 705885) 
+and (no.value = 30042146 or no.value = 30053153)
+and no.address like '9%%'
+and no.address = qi.origaddress
+order by no.tx_id, index
+;
+```
+This query can be executed after closing the voting session to get the voting results. The range of the block height can be specified to fit the voting period. Furthermore, the value for all possibilities of characteristic transactions can be adjusted. This query already checks whether someone has tried to cast a vote for a wallet that does not belong to them and automatically ignores these transactions. There is also a column that shows which is the latest characteristic transaction. This allowes that if someone changes their mind during the voting session, a transaction can be made again and only the latest transaction will be taken into account. Now further analysis must be performed on this data to get the final voting results. 
+
+![image](https://user-images.githubusercontent.com/99014268/158066530-fb08f881-ab58-4915-892e-ae6ad9a43874.png)
+
+
+#### Further analysis of raw data
+The goal is to enable the following things through further analysis:
+
+First all entries that are not the latest transactions should get removed. Since the raw voting data is stored in a csv, as well as the data from the snapshot, it must be determined how much the vote of each wallet that participated weights. This can be done by a script that combines the data and determines the weight for all valid voting transactions. 
