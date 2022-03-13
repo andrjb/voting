@@ -4,7 +4,7 @@
 * Authors: andrjb
 * Status: Draft
 * Type: Process
-* Created: 2022-03-12
+* Created: 2022-03-13
 ## Abstract
 The idea of AIP-0002 is to specify and explore concrete ideas for a voting platform. Different approaches will be considered and their advantages and disadvantages weighed. The topic of decentralization will be addressed and specific examples of how such a protocol might operate will be discussed. 
 ## Motivation
@@ -15,7 +15,7 @@ The basic principle of a voting session is simple. Every owner of cNETA or NETA 
 * The voting session gets announced together with a specific date for the snapshot and the AGPs or AIPs that will be voted on
 * At the earliest one week after the announcement a snapshot of all wallets holding cNETA or NETA is taken
 * After the snapshot, the voting page will be up, which will provide a form for voting. The voters have 7 days to submit their vote
-* Depending on the votes entered, the page will generate a characteristic number reflecting the choices. The voter can then create a transaction to themselve to register the vote on the blockchain (this can be done later with a dapp)
+* Depending on the votes entered, the page will generate a characteristic number reflecting the choices. The voter can then create a transaction to themselve to register the vote on the blockchain (this can be done with a dapp in the future)
 
 ### Traceability
 The idea is that the voting results can be verified by anyone and all steps are traceable. After the announcement and a long enough wait time, a snapshot of all wallets is taken. Everyone can reproduce this snapshot, since it will take place at a certain block height or at a certain time. These data will be used later to determine the weight of a vote. As already explained in "Basics" the voting results can also be verified by everyone since these are characteristic transactions, which are traceable on the blockchain. 
@@ -54,7 +54,6 @@ The output of the query will look similar to the following picture.
 #### Note
 This query must be executed at the time of the snapshot (or the chain-grabber must be stopped at the right time), since the amount of NETA in possession may change afterwards. 
 
-**Credits to**: *https://github.com/Eeysirhc also known as curbsideprophet for providing a [query](https://github.com/Eeysirhc/ergo-intelligence/blob/main/sql/anetabtc-address_balance.sql) which needed only slight modifications :blue_heart:*
 #### Collecting votes
 Votes can be collected through the following query. 
 ```
@@ -106,3 +105,20 @@ Imagine that a voting session is ongoing with 3 proposals. The user can determin
 In order to avoid interferences with voting sessions of other DAOs, which may use the same system, the value 012340 is added in front of the actual information (here 113) so that it is clear that this transaction belongs to an anetaBTC voting session.
 #### Potential dapp
 This approach could be made more user-friendly by building a simple dapp. Instead of having to do the transactions manually, the dapp can automatically build the transactions so that the user only has to sign the transaction. This means that the user only has to fill in his voting decisions, press a button and sign a automatically generated transaction which includes their decision. 
+#### Discussions 
+Traffic073 had the idea to do the voting with voting-tokens, which are distributed via an airdrop platform. These tokens are then collected in " ballot boxes". He described his idea with the following picture. 
+
+![image](https://user-images.githubusercontent.com/99014268/158072680-171b0311-f7c3-4239-9f67-16805c3c8ac4.png)
+
+##### Pro and contras
+This idea seems user-friendly and is probably easier to understand than the voting transactions solution in its simplest implementation. However, voting tokens must be distributed at each voting round. This can be done via an airdrop, but this can lead to high costs especially on the Cardano side. Letting users claim the tokens would be another option but it seems to increase the inhibition to participate in the voting at all. Furthermore, this solution needs more transactions in total, as the voting transaction solution only requires one transaction to be signed by the user. It is nonetheless an interesting proposal that may also be pursued. 
+## Conclusions
+The approach described in this AIP can be used to implement a traceable, verifiable, and robust voting platform that pulls all data directly from the blockchain. The user interaction is kept as simple as possible, as the user only has to make one transaction to participate in the voting. The user experience could be further enhanced by creating a voting dapp that allows the user to simply enter their voting decisions into a form and then a transaction is automatically generated. 
+
+**Credits to**: 
+
+*https://github.com/Eeysirhc also known as curbsideprophet for providing a [query](https://github.com/Eeysirhc/ergo-intelligence/blob/main/sql/anetabtc-address_balance.sql) which needed only slight modifications to create a snapshot :blue_heart:*
+
+*Pulsarz for pointing me in the right directions*
+
+*Traffic073 for discussing the AIP with me and proposing other creative solutions*
